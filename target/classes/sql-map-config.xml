@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	<!-- Alias(객체명) 설정 -->
+	<typeAliases>
+		<typeAlias type="dog.cat.punch.user.UserVO" alias="user" />
+		<typeAlias type="dog.cat.punch.board.BoardVO" alias="board" />
+		<typeAlias type="dog.cat.punch.review.ReviewVO" alias="review" />
+		<typeAlias alias="qna" type="dog.cat.punch.qna.QnaVO" />
+		<typeAlias alias="ProductsVO" type="dog.cat.punch.products.ProductsVO" />
+		<typeAlias type="dog.cat.punch.cart.CartVO" alias="cart" />
+		<typeAlias type="dog.cat.punch.reserve.ReserveVO" alias="reserve" />
+		<typeAlias type="dog.cat.punch.products.LikeVO" alias="like" />
+		<typeAlias type="dog.cat.punch.order.OrderInfoVO" alias="orderInfo" />
+		<typeAlias type="dog.cat.punch.order.OrderProVO" alias="orderPro" />
+		<typeAlias type="dog.cat.punch.order.OrderItemDTO" alias="orderItem" />
+		<typeAlias type="dog.cat.punch.order.OrderDTO" alias="order" />
+	</typeAliases>
+
+
+	<!-- Sql Mapper 설정 -->
+	<mappers>
+		<mapper resource="mappings/user-mapping.xml" />
+		<mapper resource="mappings/board-mapping.xml" />
+		<mapper resource="mappings/review-mapping.xml" />
+		<mapper resource="mappings/qna-mapping.xml" />
+		<mapper resource="mappings/products-mapping.xml" />
+		<mapper resource="mappings/cart-mapping.xml" />
+		<mapper resource="mappings/reserve-mapping.xml" />
+		<mapper resource="mappings/order-mapping.xml" />
+	</mappers>
+	
+</configuration>

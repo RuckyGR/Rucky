@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="QnaDAO">
+	<insert id="insertQna">
+		INSERT INTO qna (qna_title, qna_writer, qna_content, qna_pass, qna_filename, id)
+		VALUES (#{qna_title},#{qna_writer}, #{qna_content}, #{qna_pass}, #{qna_filename}, #{id})
+	</insert>
+
+	<update id="updateQna">
+		UPDATE qna
+		SET QNA_TITLE = #{qna_title}, QNA_CONTENT = #{qna_content}, QNA_FILENAME = #{qna_filename}
+		WHERE QNA_SEQ = #{qna_seq}
+	</update>
+           
+	<update id="updateRepl">
+		UPDATE qna
+		SET ADMIN_CONTENT = #{admin_content}, ADMIN_DATE = NOW()
+		WHERE QNA_SEQ = #{qna_seq}
+	</update>
+
+	<delete id="deleteQna">
+		DELETE FROM qna WHERE QNA_SEQ = #{qna_seq}
+	</delete>
+
+	<select id="getQna" resultType="qna">
+		SELECT * FROM qna WHERE QNA_SEQ =
+		#{qna_seq}
+	</select>
+
+	<select id="getQnaList" resultType="qna">
+		SELECT * FROM qna WHERE 1=1
+		<if test="searchCondition == 'QNA_TITLE' ">AND QNA_TITLE LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+		<if test="searchCondition == 'QNA_CONTENT' ">AND QNA_CONTENT LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+		ORDER BY QNA_SEQ DESC
+		limit #{listcnt} offset #{start}
+	</select>
+	
+	<select id="countMyQna" resultType="int">
+		SELECT COUNT(*) FROM qna WHERE ID = #{id}
+	</select>
+
+	<!-- 총 게시글 갯수 출력 -->
+	<select id="countQna" resultType="int">
+		SELECT COUNT(*) FROM qna WHERE 1=1
+		<if test="searchCondition == 'QNA_TITLE' "> AND QNA_TITLE LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'QNA_CONTENT' "> AND QNA_CONTENT LIKE CONCAT('%',#{searchKeyword},'%') </if>
+	</select>
+
+	<!-- 조회수 카운트 -->
+	<update id="updateCnt">
+		UPDATE qna SET qna_cnt = IFNULL(#{qna_cnt}, 0)+1 WHERE QNA_SEQ
+		= #{qna_seq}
+	</update>
+	
+	<!-- 파일 업로드 -->
+	<update id="updateFilename">
+	UPDATE qna SET QNA_FILENAME = '' WHERE QNA_SEQ = #{qna_seq}
+	</update>
+	
+	<select id="getQnaPass" resultType="string">
+	SELECT qna_pass FROM qna WHERE QNA_SEQ = #{qna_seq}
+	</select>
+	
+	<!-- 질문 목록 -->
+<select id="myQnaList" resultType="qna">
+    SELECT * FROM qna WHERE ID = #{id} ORDER BY QNA_SEQ DESC limit #{listcnt} offset #{start}
+</select>
+
+</mapper>

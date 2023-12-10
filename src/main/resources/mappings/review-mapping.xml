@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="ReviewDAO">
+	<insert id="insertReview">
+		INSERT INTO
+		REVIEW(rev_star,rev_writer,rev_content,rev_filename,pro_name,pro_no)
+		VALUES(#{rev_star},#{rev_writer},#{rev_content},#{rev_filename},#{pro_name},#{pro_no})
+	</insert>
+
+	<select id="selectReview" resultType="review">
+		SELECT * FROM REVIEW WHERE rev_seq = #{rev_seq}
+	</select>
+
+	<update id="updateHide">
+		UPDATE REVIEW A, report B
+		SET A.rep_hide = #{rep_hide}, B.rep_hide = #{rep_hide}
+		WHERE A.rev_seq = #{rev_seq} AND B.rev_seq = #{rev_seq}
+	</update>
+
+
+	<update id="u_updateReview">
+		UPDATE REVIEW
+		SET rev_star = #{rev_star}, rev_content = #{rev_content},
+		rev_filename = #{rev_filename}, rev_regdate = #{rev_regdate}
+		WHERE rev_seq = #{rev_seq}
+	</update>
+
+	<delete id="deleteReview">
+		DELETE FROM REVIEW WHERE rev_seq = #{rev_seq}
+	</delete>
+
+	<select id="getMyReview" resultType="review">
+		SELECT * FROM REVIEW WHERE
+		rev_writer = #{rev_writer} and rep_hide != 'N' ORDER BY REV_SEQ desc
+		limit #{listcnt} offset #{start}
+	</select>
+
+	<select id="getReview" resultType="review">
+		SELECT * FROM REVIEW WHERE
+		rev_seq = #{rev_seq}
+	</select>
+
+	<!-- <select id="getReviewList" resultType="review"> -->
+	<!-- SELECT * FROM review ORDER BY REV_SEQ DESC limit #{listcnt} offset 
+		#{start} -->
+	<!-- </select> -->
+	
+	<select id="getReviewProduct" resultType="review">
+		SELECT * FROM REVIEW WHERE pro_name = #{pro_name}
+	</select>
+	
+	
+	<select id="getReviewList" resultType="review">
+		SELECT * FROM review WHERE 1=1
+		<if test="searchCondition == 'pro_name' ">AND pro_name LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+		<if test="searchCondition == 'rev_content' ">AND rev_content LIKE CONCAT('%', #{searchKeyword}, '%')
+		</if>
+		ORDER BY REV_SEQ DESC
+		limit #{listcnt} offset #{start}
+	</select>
+
+	<!-- 파일 삭제 -->
+	<update id="updateFilename">
+		UPDATE REVIEW SET REV_FILENAME = '' WHERE REV_SEQ= #{rev_seq}
+	</update>
+
+
+	<!-- 총 게시글 갯수 출력 -->
+	<select id="countReview" resultType="int">
+		SELECT COUNT(*) FROM REVIEW
+	</select>
+
+	<!-- 조회수 카운트 -->
+	<update id="updateCnt">
+		UPDATE review SET cnt = IFNULL(#{cnt}, 0)+1 WHERE
+		rev_seq = #{rev_seq}
+	</update>
+
+	<!-- 신고 접수 -->
+	<insert id="insertReport">
+		INSERT INTO REPORT(rev_seq, rep_content, rev_content,
+		rev_writer)
+		VALUES(#{rev_seq}, #{rep_content}, #{rev_content},
+		#{rev_writer})
+	</insert>
+
+
+	<!-- 신고 목록 -->
+	<select id="declarationList" resultType="review">
+		SELECT * FROM report
+		ORDER BY REP_SEQ DESC limit #{listcnt} offset #{start}
+	</select>
+
+	<!-- 신고 삭제 -->
+	<delete id="deleteReport">
+		DELETE FROM REPORT WHERE rep_seq = #{rep_seq}
+	</delete>
+	<!-- 신고목록 총 갯수 출력 -->
+	<select id="countReport" resultType="int">
+		SELECT COUNT(*) FROM REPORT
+	</select>
+
+	<!-- 내 리뷰 갯수 출력 -->
+	<select id="countMyReview" resultType="int">
+		SELECT COUNT(*) FROM
+		REVIEW WHERE REV_WRITER =#{rev_writer} and rep_hide != 'N'
+	</select>
+
+</mapper>

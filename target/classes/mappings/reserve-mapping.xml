@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ReserveDAO">
+
+	<insert id="insertReserve">
+		INSERT INTO RESERVE (id, roomtype, checkInDate, checkOutDate, request, beautydog, petName, reserve_YN, totalPrice) 
+		VALUES (#{id}, #{roomtype}, #{checkInDate}, #{checkOutDate}, #{request}, #{beautyDog}, #{petName}, 'W', #{totalPrice})
+	</insert>
+
+	<select id="selReserve" resultType="reserve">
+		SELECT A.*, B.phone, B.name 
+		FROM RESERVE A join USERS B on A.ID = B.ID 
+		where a.id=#{id}
+	</select>
+
+	<delete id="delReserve">
+		DELETE FROM reserve WHERE reserve_no = #{reserve_no}
+	</delete>
+	
+	<update id="updateReserve">
+		UPDATE TABLE RESERVE SET checkInDate = #{checkInDate}, checkOutDate = #{checkOutDate}, request = #{request} WHERE reserve_no = #{reserve_no}
+	</update>
+	
+	<select id="selReserveUser" resultType="user">
+		SELECT * FROM USERS WHERE id = #{id}
+	</select>
+
+ 	<!-- 예약 목록 -->
+<!-- 	<select id="modifyReserve" resultType="reserve"> -->
+<!-- 		SELECT * FROM reserve ORDER BY reserve_no DESC limit #{listcnt} offset #{start} -->
+<!-- 	</select> -->
+	
+<!-- 예약 목록 조인해보기 -->
+	<select id="modifyReserve" resultType="reserve">
+    SELECT r.*, u.NAME, u.PHONE
+    FROM reserve r
+    JOIN users u ON r.id = u.ID
+    ORDER BY r.reserve_no DESC
+    LIMIT #{listcnt} OFFSET #{start}
+</select>
+	<!-- 예약 삭제 -->
+	<delete id="deleteReserve">
+		DELETE FROM RESERVE WHERE reserve_no = #{reserve_no}
+	</delete>
+	
+	<!-- 총 게시글 갯수 출력 -->
+	<select id="countReserve" resultType="int">
+		SELECT COUNT(*) FROM RESERVE 
+	</select>
+
+	<!-- 예약 Y N -->
+	<update id="upReserve">
+		UPDATE RESERVE
+		SET reserve_YN = #{reserve_YN}
+		WHERE reserve_no = #{reserve_no}
+	</update>
+	
+	<select id="getReserveList" resultType="reserve">
+		SELECT A.*, B.phone, B.name 
+		FROM RESERVE A join USERS B on A.ID = B.ID
+		order by reserve_no desc
+		limit 0,5
+	</select>
+
+	
+</mapper>

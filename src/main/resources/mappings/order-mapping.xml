@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OrderDAO">
+
+	<!-- 주문서 -->
+	<select id="getOrderItem" resultType="orderItem">
+		select *
+		from product 
+		where pro_no = #{pro_no}
+	</select>
+  	<select id="getUserInfo" resultType="user">
+  		SELECT *
+  		FROM USERS
+  		WHERE ID = #{uid}
+  	</select>
+	
+	<!-- 주문하기 -->
+	<insert id="insertOrderInfo">
+      INSERT INTO ORDERINFO(OD_NUM, OD_DATE, ID, OD_TO_NAME, OD_TO_PHONE, OD_TO_EMAIL, OD_FROM_NAME, OD_FROM_PHONE, OD_FROM_ADDRESS, OD_FROM_ADDRESS2, OD_FROM_ADDRESS3, OD_FROM_MESSAGE, OD_TOTPRICE, OD_PAYMENT, OD_DELIVERY, OD_DELIVERCOST, OD_PAYNAME, OD_PAYPRICE) 
+      VALUES(#{od_num} ,NOW(), #{id}, #{od_to_name}, #{od_to_phone}, #{od_to_email}, #{od_from_name}, #{od_from_phone}, #{od_from_address}, #{od_from_address2}, #{od_from_address3}, #{od_from_message}, #{od_totprice}, #{od_payment}, '결제완료', #{od_delivercost}, #{od_payname}, #{od_payprice})
+   </insert>
+	<insert id="insertOrderPro">
+		INSERT INTO ORDERPRO (od_num, pro_no, od_count, od_price)
+		VALUES (#{od_num}, #{pro_no}, #{od_count}, #{od_price})
+	</insert>
+	
+	<!-- 주문목록 -->
+<!-- 	<select id="getOrderList" resultType="order"> -->
+<!-- 		SELECT * -->
+<!-- 		FROM ORDERINFO -->
+<!-- 		WHERE ID = #{uid} -->
+<!-- 	</select> -->
+	
+	<!-- 주문상세 -->
+	<!-- orderInfo 정보 -->
+	<select id="getOrderInfo" resultType="order">
+		SELECT *
+		FROM ORDERINFO
+		WHERE OD_NUM = #{od_num}
+	</select>
+	<!-- orderPro 정보 -->
+	<select id="getOrderDetail" resultType="orderItem">
+		SELECT O.OD_NUM, O.PRO_NO, O.OD_COUNT, O.OD_PRICE, P.PRO_NAME, P.PRO_PRICE, P.PRO_FILENAME
+		FROM ORDERPRO O JOIN PRODUCT P
+		ON O.PRO_NO = P.PRO_NO
+		WHERE OD_NUM = #{od_num}
+	</select>
+	
+	<!-- 주문수정 -->
+	<update id="updateOrder">
+		UPDATE ORDERINFO SET
+		<if test="searchCondition == 'U_INFO' "> 
+			OD_TO_NAME = #{od_to_name}, 
+			OD_TO_PHONE = #{od_to_phone}, 
+			OD_TO_EMAIL = #{od_to_email}, 
+			OD_FROM_NAME = #{od_from_name}, 
+			OD_FROM_PHONE = #{od_from_phone}, 
+			OD_FROM_ADDRESS = #{od_from_address}, 
+			OD_FROM_ADDRESS2 = #{od_from_address2}, 
+			OD_FROM_ADDRESS3 = #{od_from_address3}, 
+			OD_FROM_MESSAGE = #{od_from_message}
+			WHERE (OD_DELIVERY = '상품준비중' or OD_DELIVERY = '결제완료') AND OD_NUM=#{od_num}
+		</if>
+		<if test="searchCondition == 'A_INFO' "> 
+			OD_TO_NAME = #{od_to_name}, 
+			OD_TO_PHONE = #{od_to_phone}, 
+			OD_TO_EMAIL = #{od_to_email}, 
+			OD_FROM_NAME = #{od_from_name}, 
+			OD_FROM_PHONE = #{od_from_phone}, 
+			OD_FROM_ADDRESS = #{od_from_address}, 
+			OD_FROM_ADDRESS2 = #{od_from_address2}, 
+			OD_FROM_ADDRESS3 = #{od_from_address3}, 
+			OD_FROM_MESSAGE = #{od_from_message}
+			WHERE OD_NUM=#{od_num}
+		</if>
+		<if test="searchCondition == 'A_DELIVERY' "> 
+			OD_DELIVERY = #{od_delivery}
+			WHERE OD_NUM=#{od_num}
+		</if>
+		
+	</update>
+	
+	<!-- 주문취소 -->
+	<update id="cancelOrder">
+		UPDATE ORDERINFO
+		SET OD_CHECK = 'C', OD_CDATE = NOW(), OD_DELIVERY = '주문취소'
+		WHERE OD_NUM=#{od_num}
+	</update>
+	
+	<select id="getOrderList" resultType="order">
+		SELECT * FROM ORDERINFO WHERE 1=1
+		<if test="searchCondition == 'ID' "> AND ID LIKE CONCAT('%',#{searchKeyword},'%')</if>
+		<if test="searchCondition == 'NAME' "> AND OD_TO_NAME LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'PHONE' "> AND OD_TO_PHONE LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'EMAIL' "> AND OD_TO_EMAIL LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'OD_NUM' "> AND OD_NUM LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'DELIVERY' "> AND OD_DELIVERY = #{searchKeyword} </if>
+		<if test="searchCondition == 'DATE' "> AND OD_DATE <![CDATA[>=]]> #{searchKeyword} AND OD_DATE <![CDATA[<=]]> #{searchKeyword2} </if>
+		<if test="searchCondition == 'MONTH' "> AND OD_DATE BETWEEN DATE_ADD(NOW(), INTERVAL -#{searchKeyword} MONTH ) AND NOW() </if>
+		<if test="searchCondition == 'SIX' "> AND OD_DATE <![CDATA[<=]]> DATE_ADD(NOW(), INTERVAL -6 MONTH ) </if>
+		<if test="searchCondition == 'uDELIVERY' "> AND OD_DELIVERY = #{searchKeyword} AND ID = #{id}</if>
+		<if test="searchCondition == 'uDATE' "> AND OD_DATE <![CDATA[>=]]> #{searchKeyword} AND OD_DATE <![CDATA[<=]]> #{searchKeyword2}  AND ID = #{id}</if>
+		<if test="searchCondition == 'uMONTH' "> AND OD_DATE BETWEEN DATE_ADD(NOW(), INTERVAL -#{searchKeyword} MONTH ) AND NOW()  AND ID = #{id}</if>
+		<if test="searchCondition == 'uSIX' "> AND OD_DATE <![CDATA[<=]]> DATE_ADD(NOW(), INTERVAL -6 MONTH )  AND ID = #{id}</if>
+		ORDER BY od_date DESC
+		limit #{listcnt} offset #{start}
+	</select>
+	
+	<!-- 총 주문수 -->
+	<select id="countOrder" resultType="int">
+		SELECT COUNT(*) FROM ORDERINFO WHERE 1=1
+		<if test="searchCondition == 'ID' "> AND ID LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'NAME' "> AND OD_TO_NAME LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'PHONE' "> AND OD_TO_PHONE LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'EMAIL' "> AND OD_TO_EMAIL LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'OD_NUM' "> AND OD_NUM LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'DELIVERY' "> AND OD_DELIVERY = #{searchKeyword} </if>
+		<if test="searchCondition == 'DATE' "> AND OD_DATE <![CDATA[>=]]> #{searchKeyword} AND OD_DATE <![CDATA[<=]]> #{searchKeyword2} </if>
+		<if test="searchCondition == 'MONTH' "> AND OD_DATE BETWEEN DATE_ADD(NOW(), INTERVAL -#{searchKeyword} MONTH ) AND NOW() </if>
+		<if test="searchCondition == 'SIX' "> AND OD_DATE <![CDATA[<=]]> DATE_ADD(NOW(), INTERVAL -6 MONTH ) </if>
+		<if test="searchCondition == 'uDELIVERY' "> AND OD_DELIVERY = #{searchKeyword} AND ID = #{id}</if>
+		<if test="searchCondition == 'uDATE' "> AND OD_DATE <![CDATA[>=]]> #{searchKeyword} AND OD_DATE <![CDATA[<=]]> #{searchKeyword2}  AND ID = #{id}</if>
+		<if test="searchCondition == 'uMONTH' "> AND OD_DATE BETWEEN DATE_ADD(NOW(), INTERVAL -#{searchKeyword} MONTH ) AND NOW()  AND ID = #{id}</if>
+		<if test="searchCondition == 'uSIX' "> AND OD_DATE <![CDATA[<=]]> DATE_ADD(NOW(), INTERVAL -6 MONTH )  AND ID = #{id}</if>
+	</select>
+	
+</mapper>
+	

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ProductsMapper">
+
+   <select id="selectList" resultType="ProductsVO">
+      SELECT * FROM Product ORDER BY pro_no 
+   </select>
+   
+   <select id="selectOne" resultType="ProductsVO">
+      SELECT * FROM Product WHERE pro_no = #{pro_no} 
+   </select>
+   
+   <select id="u_productsList" resultType="ProductsVO">
+      select * from product where pro_type = #{pro_type}
+      limit #{listcnt} offset #{start}
+   </select>
+   
+   <select id="countPro" resultType="int">
+		SELECT COUNT(*) FROM product WHERE 1=1
+		<if test="searchCondition == 'pro_name' "> AND pro_name LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'pro_no' "> AND pro_no LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == '' "> AND pro_name LIKE CONCAT('%',#{searchKeyword},'%') </if>
+	</select>
+   
+   <select id="countType" resultType="int">
+		SELECT COUNT(*) FROM product WHERE pro_type = #{pro_type}
+		<if test="searchCondition == 'pro_name' "> AND pro_name LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'pro_no' "> AND pro_no LIKE CONCAT('%',#{searchKeyword},'%') </if>
+	</select>
+   
+   <select id="getproductsList" resultType="ProductsVO">
+		SELECT * FROM product WHERE 1=1
+		<if test="searchCondition == 'pro_no' ">AND pro_no LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+		<if test="searchCondition == 'pro_name' ">AND pro_name LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+		ORDER BY pro_no DESC
+		limit #{listcnt} offset #{start}
+	</select> 
+   
+   <select id="headerSearchList" resultType="ProductsVO">
+		SELECT * FROM product WHERE 1=1
+		AND pro_name LIKE CONCAT('%', #{searchKeyword}, '%')
+		ORDER BY pro_no DESC
+		limit #{listcnt} offset #{start}
+	</select> 
+   
+   <insert id="insertProducts"> 
+      INSERT INTO Product (pro_name, pro_price, pro_descript,pro_country,pro_expiration_date,pro_filename,pro_type)
+      VALUES(#{pro_name},#{pro_price},#{pro_descript},#{pro_country},#{pro_expiration_date},#{pro_filename},#{pro_type})
+   </insert>
+
+   <update id="updateProducts">
+      UPDATE Product SET 
+      pro_name = #{pro_name},
+      pro_price = #{pro_price},
+      pro_descript = #{pro_descript},
+      pro_country = #{pro_country},
+      pro_expiration_date = #{pro_expiration_date},
+      pro_filename = #{pro_filename}
+      WHERE
+      pro_no = #{pro_no}
+   </update>
+
+   <delete id="deletProducts">
+      DELETE FROM product WHERE
+      pro_no = #{pro_no}
+   </delete> 
+   
+   <select id="selProducts" resultType="ProductsVO">
+		SELECT * FROM Product WHERE pro_no=#{pro_no} 
+	</select>
+	
+	<select id="bringLike" resultType="like">
+		SELECT * from productslike where pro_no = #{pro_no} and id=#{id}
+	</select>
+	
+	<select id="selLike" resultType="like">
+		SELECT l.*, p.* 
+		from productslike l join product p 
+		on l.pro_no = p.pro_no
+		where id = #{id}
+	</select>
+	
+	<select id="selMyLike" resultType="like">
+		SELECT l.*, p.* 
+		from productslike l join product p 
+		on l.pro_no = p.pro_no
+		where id = #{id}
+		order by l.like_pro_no desc
+		limit 4 offset 0
+	</select>
+	
+	<insert id="checkLike">  
+		insert into productslike (id, like_check, pro_no) 
+		values (#{id}, 1, #{pro_no})
+	</insert>
+	
+	<delete id="deleteLike">
+		delete from productslike where pro_no = #{pro_no} and id = #{id}
+	</delete>
+	
+	<!-- 파일 삭제 -->
+	<update id="updateFilename">
+	UPDATE Product SET PRO_FILENAME = '' WHERE PRO_NO= #{pro_no}
+	</update>
+
+	
+	<select id="cookieList" resultType="ProductsVO">
+		SELECT * FROM product
+		<choose>
+			<when test="noArr != null">
+				<where>
+					<foreach collection="noArr" item="item" open="pro_no in (" close=")" separator=",">
+						#{item}
+					</foreach>
+				</where>
+			</when>
+			<otherwise>
+				where 1=0
+			</otherwise>
+		</choose>
+	</select>
+	
+	<delete id="selectDelLike">
+		DELETE FROM productsLike
+		where like_pro_no = #{like_pro_no}
+	</delete>
+	
+	<select id="bestItem" resultType="ProductsVO">
+		SELECT P.*
+		FROM ORDERPRO O
+		JOIN PRODUCT P ON O.PRO_NO = P.PRO_NO
+		GROUP BY O.PRO_NO
+		ORDER BY COUNT(O.PRO_NO) DESC
+		LIMIT 8;
+	</select>
+	
+	
+
+</mapper>

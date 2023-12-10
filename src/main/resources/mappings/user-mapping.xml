@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="UserDAO">
+
+	   <!-- 탈퇴 여부 -->
+   <update id="updateLeave">
+      UPDATE USERS SET Leave_status=#{leave_status}, leave_date =sysdate() WHERE ID=#{id}
+   </update>
+
+	<!-- 비밀번호 수정 -->
+	<update id="updatePw">
+		UPDATE USERS SET PASSWORD=#{password1} WHERE ID=#{id}
+	</update>
+
+<!--    소셜 로그인 -->
+   <insert id="joinSocialUser">
+       INSERT INTO users (id, name, phone, email, regdate) 
+       VALUES (#{id}, #{name}, #{phone}, #{email}, sysdate())
+   </insert>
+
+<!-- 아이디찾기 -->
+	<select id="checkId" resultType="user">
+		SELECT id FROM USERS WHERE mail_key=#{mail_key} and email=#{email} and leave_status = 'N'
+	</select>
+
+<!-- 아이디찾기 이메일인증 위한 랜덤번호 저장 -->
+<update id="updateMailKey" parameterType="user">
+    update users set mail_key=#{mail_key} where email=#{email} and phone=#{phone}
+</update>
+
+<!-- 비밀번호 재발급 -->
+<update id="findPw" >
+update users set password = #{newPw} where EMAIL = #{email} and ID = #{id}
+</update>
+
+<!-- 비밀번호 찾기위한 아이디 이메일 확인 -->
+<select id="findPwCheck" resultType="int">
+select count(*) from users where EMAIL = #{email} and ID = #{id}
+</select>
+
+<!-- 회원가입 -->	
+	<insert id="joinUser">
+<!-- 		INSERT INTO USERS (ID, PASSWORD, NAME, PHONE, EMAIL, TYPE, PET_NAME, PET_BIRTH) VALUES (#{id}, #{password}, #{name}, #{phone}, #{email}, #{type}, #{pet_name}, #{pet_birth} ); -->
+		 INSERT INTO USERS (id, password, name, phone, email, regdate, type, pet_name, pet_birth) 
+		 VALUES (#{id}, #{password}, #{name}, #{phone}, #{email}, sysdate(), #{type}, #{pet_name}, #{pet_birth});
+	</insert>
+
+	<!-- 아이디 중복 체크 -->
+<select id="idChk" resultType="int">
+	SELECT COUNT(*) FROM USERS
+	WHERE ID = #{id}
+</select>
+
+
+<!-- 로그인 -->
+	<select id="getUser" resultType="user">
+		SELECT * FROM USERS WHERE ID=#{id} 
+<!-- 		AND PASSWORD=#{password} -->
+	</select>
+
+
+<!-- 회원목록 불러오기 페이징 및 검색기능 구현 -->	
+	<select id="getUserList" resultType="user">
+		SELECT * FROM USERS WHERE 1=1
+		<if test="searchCondition == 'ID' "> AND id LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'NAME' "> AND name LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		ORDER BY regdate desc, id 
+		limit #{listcnt} offset #{start}
+	</select>
+	
+
+	
+<!-- 마이페이지, 회원정보상세보기 -->	
+	<select id="selUser" resultType="user">
+		SELECT * FROM USERS WHERE ID=#{id} 
+	</select>
+
+<!-- 삭제 예정 -->
+	<!-- 회원탈퇴 -->
+	<delete id="delUser">
+		DELETE FROM USERS WHERE ID = #{id}
+	</delete>
+	
+	<!-- 회원정보 수정 -->
+	<update id="a_updateUser">
+		UPDATE USERS SET NAME=#{name}, PHONE=#{phone}, EMAIL=#{email}, TYPE=#{type}, PET_NAME=#{pet_name}, 
+		PET_BIRTH=#{pet_birth}, regdate=#{regdate}, leave_status=#{leave_status}, leave_date=#{leave_date} WHERE ID=#{id}
+	</update>
+	
+		<!-- 회원정보 수정 -->
+	<update id="u_updateUser">
+		UPDATE USERS SET NAME=#{name}, PHONE=#{phone}, EMAIL=#{email}, TYPE=#{type}, PET_NAME=#{pet_name}, 
+		PET_BIRTH=#{pet_birth}, filename=#{filename} WHERE ID=#{id}
+	</update>
+	
+		<!-- 총 회원수 출력 -->
+	<select id="countUser" resultType="int">
+		SELECT COUNT(*) FROM users WHERE 1=1
+		<if test="searchCondition == 'ID' "> AND ID LIKE CONCAT('%',#{searchKeyword},'%') </if>
+		<if test="searchCondition == 'NAME' "> AND NAME LIKE CONCAT('%',#{searchKeyword},'%') </if>
+	</select>
+	
+	<!-- 	펫정보 불러오기 -->
+	<select id="petInfo" resultType="user">
+		SELECT * FROM USERS WHERE ID=#{id} 
+	</select>
+
+	<update id="updateFilename">
+		UPDATE USERS SET FILENAME= #{filename} WHERE ID= #{id}
+	</update>
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+	xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+
+	<beans:import resource="classpath:applicationContext.xml" />
+	<context:component-scan base-package="dog.cat.punch" />
+	<annotation-driven />
+
+	<beans:bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<beans:property name="maxUploadSize" value="5000000" />
+		<beans:property name="maxInMemorySize" value="1000000" />
+		<beans:property name="defaultEncoding" value="utf-8" />
+	</beans:bean>
+
+	<resources mapping="/resources/**" location="/resources/" />
+
+	<!-- ViewResolver -->
+	<beans:bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+	
+	 <!-- email 인증 관련   -->
+    <beans:bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <beans:property name="host" value="smtp.gmail.com" />
+        <beans:property name="port" value="587" />
+        <beans:property name="username" value="luvv6594@gmail.com"/>
+        <beans:property name="password" value="kuxw xbgy himv jjqd" />
+        <beans:property name="javaMailProperties">
+            <beans:props>
+                <beans:prop key="mail.transport.protocol">smtp</beans:prop>
+                <beans:prop key="mail.smtp.auth">true</beans:prop>
+                <beans:prop key="mail.smtp.starttls.enable">true</beans:prop>
+                <beans:prop key="mail.debug">true</beans:prop>
+                <beans:prop key="mail.smtp.ssl.trust">smtp.gmail.com</beans:prop>
+                <beans:prop key="mail.smtp.ssl.protocols">TLSv1.2</beans:prop>
+            </beans:props>
+        </beans:property>
+    </beans:bean>
+
+	<!-- interceptors -->
+	<!-- <interceptors> -->
+	<!-- <interceptor> -->
+	<!-- <mapping path="/**"/> -->
+	<!-- <mapping path="/main*"/> -->
+	<!-- <mapping path="/join*"/> -->
+	<!-- <exclude-mapping path="/login*"/> -->
+	<!-- <exclude-mapping path="/join*"/> -->
+	<!-- <exclude-mapping path="/home*"/> -->
+	<!-- <exclude-mapping path="/front/**"/> -->
+	<!-- <exclude-mapping path="/front/*"/> -->
+	<!-- <exclude-mapping path="/pathvar/**"/> -->
+	<!-- <beans:bean class="com.my.web.interceptor.Interceptor"/> -->
+	<!-- </interceptor> -->
+	<!-- </interceptors> -->
+
+</beans:beans>
